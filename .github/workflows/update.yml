@@ -1,0 +1,36 @@
+name: 每日更新台指期貨法人資料
+
+on:
+  schedule:
+    # 台灣時間下午 4:30（UTC 08:30），期交所收盤後約半小時
+    - cron: '30 8 * * 1-5'
+  workflow_dispatch:   # 允許手動觸發
+
+jobs:
+  fetch-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 需要寫入 repo 的權限
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch data
+        run: python fetch_data.py
+
+      - name: Commit & push data.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "chore: auto-update data $(date '+%Y-%m-%d')"
+          git push
