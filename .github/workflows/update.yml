@@ -2,37 +2,40 @@ name: 每日更新台指期貨法人資料
 
 on:
   schedule:
-    # 台灣時間下午 4:30（UTC 08:30），期交所收盤後約半小時，僅週一至週五
-    - cron: '30 8 * * 1-5'
+    # 台灣時間下午 5:00（UTC 09:00），期交所收盤後
+    - cron: '0 9 * * 1-5'
   workflow_dispatch:   # 允許手動觸發
 
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 需要寫入 repo 的權限
+      contents: write
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4   # ✅ Node.js 20 compatible
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5   # ✅ Node.js 20 compatible
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
         run: pip install requests
 
-      - name: Fetch latest data
+      - name: 🔍 Debug API (查看欄位，出錯時有助排查)
+        run: python debug_api.py
+        continue-on-error: true   # debug 失敗不中止
+
+      - name: 📥 Fetch latest data
         run: python fetch_data.py
 
-      - name: Commit & push data.json
+      - name: 💾 Commit & push data.json
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json
-          # 如果沒有新資料（非交易日爬不到），不會 commit 也不會 fail
-          git diff --staged --quiet && echo "沒有新資料，略過 commit" && exit 0
+          git diff --staged --quiet && echo "沒有新資料（可能是非交易日），略過 commit" && exit 0
           git commit -m "chore: auto-update data $(date '+%Y-%m-%d')"
           git push
