@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
 台指期貨三大法人多空未平倉淨額
-資料來源：臺灣期貨交易所官方 OpenAPI + 備援 HTML 解析
+資料來源：臺灣期貨交易所 https://www.taifex.com.tw/cht/3/futContractsDate
+每天由 GitHub Actions 執行，資料累積存到 data.json
+
+資料結構（已確認）：
+  每列包含：序號、商品名稱、身份別、多方口數、多方金額、空方口數、空方金額、多空淨額口數、多空淨額金額
+  未平倉餘額也在同一列，欄位 9-14
+  臺股期貨 = 序號1，包含3列：自營商、投信、外資
 """
 
 import json
@@ -12,196 +18,208 @@ from html.parser import HTMLParser
 
 import requests
 
-SESSION = requests.Session()
-SESSION.headers.update({
-    "Accept": "application/json, text/html, */*",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+URL = "https://www.taifex.com.tw/cht/3/futContractsDate"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "zh-TW,zh;q=0.9",
-})
-
-# ── 資料來源（依序嘗試）────────────────────────────────────
-SOURCES = [
-    # 期交所官方 OpenAPI v1
-    {
-        "name": "TAIFEX OpenAPI v1 (整體市場)",
-        "url":  "https://openapi.taifex.com.tw/v1/FuturesInstitutionalInvestorsInTheEntireMarket",
-        "type": "json",
-    },
-    # 期交所官方 OpenAPI — 另一個可能的 endpoint
-    {
-        "name": "TAIFEX OpenAPI v1 (各契約)",
-        "url":  "https://openapi.taifex.com.tw/v1/FuturesInstitutionalInvestors",
-        "type": "json",
-    },
-    # 期交所 HTML（多個嘗試）
-    {
-        "name": "TAIFEX HTML (futContractsDate)",
-        "url":  "https://www.taifex.com.tw/cht/3/futContractsDate",
-        "type": "html",
-    },
-]
-
-# 台指期可能的契約名稱關鍵字
-TXF_KEYWORDS = ["臺股期貨", "台股期貨", "TXF", "TX ", "臺指"]
+    "Referer": "https://www.taifex.com.tw/cht/3/futContractsDate",
+}
 
 
-def try_fetch_json(url: str) -> list | None:
-    try:
-        r = SESSION.get(url, timeout=20)
-        print(f"  HTTP {r.status_code}  Content-Type: {r.headers.get('content-type','')}")
-        print(f"  Body preview: {r.text[:200]!r}")
-        if r.status_code != 200:
-            return None
-        ct = r.headers.get("content-type", "")
-        if "json" not in ct and not r.text.strip().startswith("["):
-            print("  [SKIP] 不是 JSON 格式")
-            return None
-        return r.json()
-    except Exception as e:
-        print(f"  [FAIL] {e}")
-        return None
-
-
-# ── HTML 解析備援（期交所 HTML 頁面）──────────────────────
 class TableParser(HTMLParser):
+    """解析 HTML 表格，回傳 list of list[str]"""
     def __init__(self):
         super().__init__()
-        self.rows, self.cur_row, self.cur_cell = [], [], ""
+        self.tables = []        # 所有 table 的所有列
+        self.cur_table = []     # 目前 table 的列
+        self.cur_row = []       # 目前列
+        self.cur_cell = ""      # 目前格
         self.in_td = False
+        self.in_table = False
 
     def handle_starttag(self, tag, attrs):
-        if tag in ("td", "th"):
+        if tag == "table":
+            self.in_table = True
+            self.cur_table = []
+        elif tag in ("tr",):
+            self.cur_row = []
+        elif tag in ("td", "th") and self.in_table:
             self.in_td = True
             self.cur_cell = ""
-        if tag == "tr":
-            self.cur_row = []
-
+            # 讀取 rowspan/colspan（暫不展開，但要記錄）
+        
     def handle_endtag(self, tag):
-        if tag in ("td", "th"):
+        if tag == "table":
+            self.tables.append(self.cur_table)
+            self.in_table = False
+        elif tag in ("td", "th") and self.in_table:
             self.in_td = False
             self.cur_row.append(self.cur_cell.strip())
-        if tag == "tr" and self.cur_row:
-            self.rows.append(self.cur_row)
+        elif tag == "tr" and self.in_table and self.cur_row:
+            self.cur_table.append(self.cur_row)
+            self.cur_row = []
 
     def handle_data(self, data):
         if self.in_td:
-            self.cur_cell += data
+            self.cur_cell += data.strip()
 
 
-def parse_taifex_html(url: str) -> list[dict] | None:
+def safe_int(s: str) -> int | None:
     try:
-        r = SESSION.get(url, timeout=20)
-        print(f"  HTTP {r.status_code}")
-        if r.status_code != 200:
-            return None
-        p = TableParser()
-        p.feed(r.text)
-        rows = [row for row in p.rows if len(row) >= 10 and re.match(r"\d{4}/\d{2}/\d{2}|\d{3}/\d{2}/\d{2}", row[0])]
-        if not rows:
-            print("  [SKIP] 找不到日期格式列")
-            return None
-        print(f"  找到 {len(rows)} 列資料")
-        return rows
-    except Exception as e:
-        print(f"  [FAIL] {e}")
-        return None
-
-
-def safe_int(s):
-    try:
-        return int(str(s).replace(",", "").strip())
+        return int(str(s).replace(",", "").replace(" ", "").strip())
     except:
         return None
 
 
-def process_json_rows(raw: list) -> dict:
-    """處理 OpenAPI JSON 格式"""
-    records = {}
-    if not raw:
-        return records
+def extract_date(html: str) -> str | None:
+    """從 HTML 標題或表格抓日期"""
+    # 格式: 日期2026/04/17 或 日期YYYY/MM/DD
+    m = re.search(r"日期(\d{4}/\d{2}/\d{2})", html)
+    if m:
+        return m.group(1)
+    return None
 
-    # 印出第一筆看欄位
-    print(f"\n  [DEBUG] 第一筆資料欄位：")
-    for k, v in raw[0].items():
-        print(f"    {k}: {v!r}")
 
-    # 找台指期的列
-    txf_rows = []
-    for row in raw:
-        name_fields = [str(row.get(k, "")) for k in ["ContractName", "ContractCode", "名稱", "商品名稱", "contract_name"]]
-        combined = " ".join(name_fields)
-        if any(kw in combined for kw in TXF_KEYWORDS):
-            txf_rows.append(row)
+def parse(html: str) -> dict | None:
+    """
+    解析 futContractsDate 頁面，回傳台指期三大法人未平倉淨額。
+    
+    表格欄位（已確認）：
+    col 0: 序號
+    col 1: 商品名稱  (跨列 rowspan=3，但 parser 只在第一列出現)
+    col 2: 身份別    (自營商/投信/外資)
+    col 3: 交易多方口數
+    col 4: 交易多方金額
+    col 5: 交易空方口數
+    col 6: 交易空方金額
+    col 7: 交易多空淨額口數
+    col 8: 交易多空淨額金額
+    col 9: 未平倉多方口數    ← 我們要的
+    col 10: 未平倉多方金額
+    col 11: 未平倉空方口數   ← 我們要的
+    col 12: 未平倉空方金額
+    col 13: 未平倉多空淨額口數  ← 直接有！
+    col 14: 未平倉多空淨額金額
+    """
+    date_str = extract_date(html)
+    if not date_str:
+        print("[WARN] 找不到日期", file=sys.stderr)
+        return None
 
-    print(f"\n  台指期相關列數：{len(txf_rows)}")
-    if txf_rows:
-        print(f"  [DEBUG] 台指期第一筆：{json.dumps(txf_rows[0], ensure_ascii=False)}")
+    parser = TableParser()
+    parser.feed(html)
 
-    if not txf_rows:
-        # 如果找不到台指期，試著找所有 ContractName
-        all_names = sorted(set(
-            str(row.get("ContractName", row.get("ContractCode", "?")))
-            for row in raw
-        ))
-        print(f"\n  [DEBUG] 所有 ContractName：{all_names}")
-        # 用全部資料試試（整體市場 API 可能本身就只有一筆）
-        txf_rows = raw
+    data = {"dealer": None, "itrust": None, "foreign": None}
 
-    for row in txf_rows:
-        # 嘗試多種日期欄位名
-        date_raw = (row.get("Date") or row.get("日期") or row.get("date") or "")
-        date_str = str(date_raw).replace("-", "/").strip()
-        if not date_str or len(date_str) < 8:
-            continue
+    # 找包含 "臺股期貨" 的表格
+    for table in parser.tables:
+        found_txf = False
+        current_product = None
 
-        # 民國轉西元
-        if re.match(r"^\d{3}/", date_str):
-            y = int(date_str[:3]) + 1911
-            date_str = f"{y}{date_str[3:]}"
+        for row in table:
+            if not row:
+                continue
+            
+            # 找到臺股期貨的列（序號=1，商品名稱含臺股期貨）
+            # 因為 rowspan，第一列有商品名稱，後兩列只有身份別
+            
+            # 判斷是否有商品名稱（臺股期貨）
+            row_str = "".join(row)
+            if "臺股期貨" in row_str:
+                found_txf = True
+                current_product = "臺股期貨"
+            
+            if not found_txf:
+                continue
 
-        if date_str in records:
-            continue
+            # 找身份別
+            identity = None
+            for cell in row:
+                cell = cell.strip()
+                if cell in ("自營商", "投信", "外資"):
+                    identity = cell
+                    break
+            
+            if identity is None:
+                continue
 
-        # 嘗試多種欄位名稱組合
-        def get(row, *keys):
-            for k in keys:
-                if k in row:
-                    return safe_int(row[k])
-            return None
+            # 嘗試從列中取出未平倉淨額（col 13）
+            # 由於 HTML parser 不展開 rowspan，列長度會不同
+            # 第一列（含商品名稱）比後兩列多1欄
+            # 我們要找 "多空淨額口數" 在未平倉區
+            
+            # 過濾掉純文字標題列
+            nums = [c for c in row if re.match(r"^-?[\d,]+$", c.strip())]
+            
+            if len(nums) >= 6:
+                # 最後一批數字是未平倉區 (多方口數, 多方金額, 空方口數, 空方金額, 淨額口數, 淨額金額)
+                # 取倒數第三個（淨額口數）
+                net_oi = safe_int(nums[-3])  # 未平倉多空淨額口數
+                
+                if identity == "自營商":
+                    data["dealer"] = net_oi
+                elif identity == "投信":
+                    data["itrust"] = net_oi
+                elif identity == "外資":
+                    data["foreign"] = net_oi
 
-        f_long  = get(row, "ForeignDealersLongOI",  "ForLong",  "外資多方")
-        f_short = get(row, "ForeignDealersShortOI", "ForShort", "外資空方")
-        i_long  = get(row, "InvestmentTrustLongOI", "ITLong",   "投信多方")
-        i_short = get(row, "InvestmentTrustShortOI","ITShort",  "投信空方")
-        d_long  = get(row, "DealerLongOI",          "DealerLong","自營商多方")
-        d_short = get(row, "DealerShortOI",         "DealerShort","自營商空方")
+            # 遇到下一個商品（序號≥2）就停止
+            if "電子期貨" in row_str or "金融期貨" in row_str:
+                break
 
-        # 也嘗試直接有淨額的欄位
-        foreign = get(row, "ForeignDealersNetOI", "ForNet") or (
-            (f_long - f_short) if (f_long is not None and f_short is not None) else None
-        )
-        itrust  = get(row, "InvestmentTrustNetOI", "ITNet") or (
-            (i_long - i_short) if (i_long is not None and i_short is not None) else None
-        )
-        dealer  = get(row, "DealerNetOI", "DealerNet") or (
-            (d_long - d_short) if (d_long is not None and d_short is not None) else None
-        )
-        total   = (
-            (foreign + itrust + dealer)
-            if all(x is not None for x in [foreign, itrust, dealer])
-            else None
-        )
+        if found_txf and any(v is not None for v in data.values()):
+            break  # 找到了就不用繼續找其他 table
 
-        records[date_str] = {
-            "date": date_str,
-            "foreign": foreign, "foreign_chg": None,
-            "itrust":  itrust,  "itrust_chg":  None,
-            "dealer":  dealer,  "dealer_chg":  None,
-            "total":   total,   "total_chg":   None,
-            "futures": None,    "futures_chg": None,
-        }
+    # 若三個都是 None，嘗試備案：用 regex 直接從 HTML 中搜尋
+    if all(v is None for v in data.values()):
+        print("[WARN] 表格解析失敗，嘗試 regex 備援", file=sys.stderr)
+        data = parse_regex_fallback(html)
 
-    return records
+    if all(v is None for v in data.values()):
+        return None
+
+    total = None
+    if all(v is not None for v in [data["dealer"], data["itrust"], data["foreign"]]):
+        total = data["dealer"] + data["itrust"] + data["foreign"]
+
+    return {
+        "date":    date_str,
+        "foreign": data["foreign"],
+        "itrust":  data["itrust"],
+        "dealer":  data["dealer"],
+        "total":   total,
+        "foreign_chg": None,
+        "itrust_chg":  None,
+        "dealer_chg":  None,
+        "total_chg":   None,
+        "futures":     None,
+        "futures_chg": None,
+    }
+
+
+def parse_regex_fallback(html: str) -> dict:
+    """備援：regex 直接從 HTML 找臺股期貨的三大法人未平倉淨額"""
+    data = {"dealer": None, "itrust": None, "foreign": None}
+    
+    # 找臺股期貨區段
+    txf_match = re.search(r"臺股期貨(.*?)電子期貨", html, re.DOTALL)
+    if not txf_match:
+        return data
+    
+    segment = txf_match.group(1)
+    
+    # 在這個區段裡找各身份別
+    for identity, key in [("自營商", "dealer"), ("投信", "itrust"), ("外資", "foreign")]:
+        m = re.search(rf"{identity}(.*?)(投信|外資|</tr>)", segment, re.DOTALL)
+        if m:
+            nums = re.findall(r"-?[\d,]+", m.group(1))
+            nums_int = [safe_int(n) for n in nums if safe_int(n) is not None]
+            if len(nums_int) >= 6:
+                data[key] = nums_int[-3]  # 未平倉多空淨額口數
+    
+    return data
 
 
 def calc_changes(records_map: dict) -> list[dict]:
@@ -212,7 +230,9 @@ def calc_changes(records_map: dict) -> list[dict]:
         if prev:
             for f in ["foreign", "itrust", "dealer", "total"]:
                 r[f"{f}_chg"] = (
-                    (r[f] - prev[f]) if (r[f] is not None and prev[f] is not None) else None
+                    (r[f] - prev[f])
+                    if (r[f] is not None and prev[f] is not None)
+                    else None
                 )
         prev = r
         result.append(r)
@@ -220,42 +240,44 @@ def calc_changes(records_map: dict) -> list[dict]:
 
 
 def main():
-    print("[INFO] 開始從期交所官方 API 取得資料...\n")
+    print("[INFO] 從期交所官方頁面取得三大法人未平倉資料...")
+    print(f"[INFO] URL: {URL}")
 
-    new_records_map = {}
-
-    for src in SOURCES:
-        print(f"[TRY] {src['name']}")
-        print(f"      URL: {src['url']}")
-
-        if src["type"] == "json":
-            raw = try_fetch_json(src["url"])
-            if raw and isinstance(raw, list) and len(raw) > 0:
-                new_records_map = process_json_rows(raw)
-                if new_records_map:
-                    print(f"\n[OK] 成功取得 {len(new_records_map)} 筆台指期資料")
-                    break
-        print()
-
-    if not new_records_map:
-        print("[ERROR] 所有來源均失敗，請查看上方 debug 輸出", file=sys.stderr)
+    try:
+        r = requests.get(URL, headers=HEADERS, timeout=30)
+        r.raise_for_status()
+        html = r.content.decode("utf-8", errors="replace")
+        print(f"[INFO] HTTP {r.status_code}, 頁面大小: {len(html)} chars")
+    except requests.RequestException as e:
+        print(f"[ERROR] 請求失敗: {e}", file=sys.stderr)
         sys.exit(1)
+
+    record = parse(html)
+
+    if record is None:
+        print("[WARN] 解析失敗，可能是非交易日或頁面結構異動")
+        print("[INFO] 列印 HTML 前 1000 字元供排查：")
+        print(html[:1000])
+        # 非交易日不視為錯誤
+        sys.exit(0)
+
+    print(f"[INFO] 解析成功：{record['date']} | 外資={record['foreign']} | 投信={record['itrust']} | 自營商={record['dealer']} | 總和={record['total']}")
 
     # 合併舊資料
     try:
         with open("data.json", "r", encoding="utf-8") as f:
             old = json.load(f)
         old_map = {r["date"]: r for r in old.get("records", [])}
-        print(f"[INFO] 合併舊資料 {len(old_map)} 筆")
+        print(f"[INFO] 載入舊資料 {len(old_map)} 筆")
     except (FileNotFoundError, json.JSONDecodeError):
         old_map = {}
 
-    merged_map = {**old_map, **new_records_map}
-    merged_list = list(reversed(calc_changes(merged_map)))
+    old_map[record["date"]] = record
+    merged_list = list(reversed(calc_changes(old_map)))
 
     output = {
         "updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "source":  SOURCES[0]["url"],
+        "source": URL,
         "records": merged_list,
     }
 
