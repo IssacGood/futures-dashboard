@@ -9,226 +9,165 @@
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 
   :root {
-    --bg:       #0b0f1a;
-    --surface:  #111827;
-    --border:   #1f2a3c;
-    --text:     #e2e8f0;
-    --muted:    #64748b;
-    --green:    #22d3a0;
-    --red:      #f4626a;
-    --blue:     #60a5fa;
-    --yellow:   #fbbf24;
-    --purple:   #a78bfa;
-    --orange:   #fb923c;
+    --bg:      #0b0f1a;
+    --surface: #111827;
+    --surface2:#161f30;
+    --border:  #1f2a3c;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
+    --green:   #22d3a0;
+    --red:     #f4626a;
+    --blue:    #60a5fa;
+    --yellow:  #fbbf24;
+    --purple:  #a78bfa;
+    --orange:  #fb923c;
+    --futures: #f0abfc;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  * { box-sizing:border-box; margin:0; padding:0; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans TC', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 60px;
+    background:var(--bg); color:var(--text);
+    font-family:'Noto Sans TC',sans-serif;
+    min-height:100vh; padding-bottom:64px;
   }
 
-  /* ── Header ── */
+  /* Header */
   header {
-    background: linear-gradient(135deg, #0b0f1a 0%, #111827 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 28px 32px 24px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
+    border-bottom:1px solid var(--border);
+    padding:24px 32px 20px;
+    display:flex; align-items:flex-end;
+    justify-content:space-between; flex-wrap:wrap; gap:12px;
+    background:linear-gradient(180deg,#0d1220 0%,var(--bg) 100%);
   }
-  .header-left h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+  header h1 { font-size:1.45rem; font-weight:700; letter-spacing:-.02em; }
+  header h1 span { color:var(--green); }
+  header p { color:var(--muted); font-size:.75rem; margin-top:3px; font-family:'Space Mono',monospace; }
+  .badge {
+    font-family:'Space Mono',monospace; font-size:.7rem;
+    color:var(--muted); border:1px solid var(--border);
+    padding:5px 12px; border-radius:20px; white-space:nowrap;
   }
-  .header-left h1 span { color: var(--green); }
-  .header-left p {
-    color: var(--muted);
-    font-size: 0.8rem;
-    margin-top: 4px;
-    font-family: 'Space Mono', monospace;
-  }
-  .updated-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .updated-badge strong { color: var(--green); }
+  .badge strong { color:var(--green); }
 
-  /* ── Range buttons ── */
+  /* Controls */
   .controls {
-    padding: 16px 32px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--border);
+    padding:12px 32px; display:flex; gap:8px;
+    align-items:center; flex-wrap:wrap;
+    border-bottom:1px solid var(--border); background:var(--surface2);
   }
-  .controls label { font-size: 0.75rem; color: var(--muted); margin-right: 4px; }
+  .controls-label { font-size:.72rem; color:var(--muted); margin-right:4px; }
   .btn-range {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
-    padding: 5px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all .15s;
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-family:'Space Mono',monospace; font-size:.7rem;
+    padding:4px 13px; border-radius:4px; cursor:pointer; transition:all .15s;
   }
-  .btn-range:hover { border-color: var(--green); color: var(--green); }
-  .btn-range.active { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; }
+  .btn-range:hover { border-color:var(--green); color:var(--green); }
+  .btn-range.active { background:var(--green); border-color:var(--green); color:#000; font-weight:700; }
 
-  /* ── Stat cards ── */
+  /* Cards */
   .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    padding: 20px 32px 0;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; padding:16px 32px 0;
   }
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:14px; position:relative; overflow:hidden;
   }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .card.green::before { background: var(--green); }
-  .card.red::before   { background: var(--red); }
-  .card.blue::before  { background: var(--blue); }
-  .card.yellow::before { background: var(--yellow); }
-  .card.purple::before { background: var(--purple); }
-  .card-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .card-value { font-family: 'Space Mono', monospace; font-size: 1.25rem; font-weight: 700; }
-  .card-value.pos { color: var(--green); }
-  .card-value.neg { color: var(--red); }
-  .card-chg { font-size: 0.72rem; font-family: 'Space Mono', monospace; color: var(--muted); margin-top: 4px; }
-  .card-chg.up { color: var(--green); }
-  .card-chg.dn { color: var(--red); }
+  .card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+  .card.c-green::before  { background:var(--green); }
+  .card.c-red::before    { background:var(--red); }
+  .card.c-blue::before   { background:var(--blue); }
+  .card.c-yellow::before { background:var(--yellow); }
+  .card.c-futures::before{ background:var(--futures); }
+  .card-label { font-size:.65rem; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.05em; }
+  .card-val { font-family:'Space Mono',monospace; font-size:1.2rem; font-weight:700; }
+  .card-val.pos { color:var(--green); }
+  .card-val.neg { color:var(--red); }
+  .card-chg { font-size:.68rem; font-family:'Space Mono',monospace; color:var(--muted); margin-top:3px; }
+  .card-chg.up { color:var(--green); }
+  .card-chg.dn { color:var(--red); }
 
-  /* ── Charts ── */
-  .charts {
-    padding: 20px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+  /* Chart panels */
+  .charts { padding:16px 32px; display:flex; flex-direction:column; gap:16px; }
   .chart-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:20px 22px;
   }
+  .chart-header { margin-bottom:14px; }
   .chart-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.03em;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size:.82rem; font-weight:700; color:var(--text);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
   }
-  .chart-title .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    display: inline-block;
-  }
-  .chart-sub { font-size: 0.72rem; color: var(--muted); margin-bottom: 16px; }
-  .chart-wrap { position: relative; }
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .chart-sub { font-size:.68rem; color:var(--muted); margin-top:4px; }
 
-  /* ── Table ── */
+  /* Clickable legend pills for chart 1 */
+  .legend-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .lpill {
+    display:flex; align-items:center; gap:5px;
+    font-family:'Space Mono',monospace; font-size:.62rem; color:var(--muted);
+    cursor:pointer; user-select:none;
+    padding:3px 9px; border-radius:12px; border:1px solid var(--border);
+    transition:all .15s;
+  }
+  .lpill:hover { color:var(--text); border-color:#3a4a60; }
+  .lpill.off { opacity:.3; }
+  .lswatch { width:14px; height:2px; border-radius:2px; flex-shrink:0; }
+  .lswatch.dash { background:none !important;
+    border-top:2px dashed; border-color:inherit; width:14px; }
+
+  /* Table */
   .table-panel {
-    margin: 0 32px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+    margin:0 32px; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden;
   }
-  .table-panel h3 {
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-  }
-  .table-scroll { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .table-panel h3 { font-size:.82rem; font-weight:700; padding:14px 18px; border-bottom:1px solid var(--border); }
+  .table-scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.74rem; }
   thead th {
-    background: #0d1220;
-    padding: 10px 14px;
-    text-align: right;
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border);
+    background:#0d1220; padding:9px 13px; text-align:right;
+    color:var(--muted); font-family:'Space Mono',monospace;
+    font-size:.63rem; text-transform:uppercase; letter-spacing:.04em;
+    white-space:nowrap; border-bottom:1px solid var(--border);
   }
-  thead th:first-child { text-align: left; }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-  tbody tr:last-child { border: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  thead th:first-child { text-align:left; }
+  tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+  tbody tr:last-child { border:none; }
+  tbody tr:hover { background:rgba(255,255,255,.025); }
   tbody td {
-    padding: 9px 14px;
-    text-align: right;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    white-space: nowrap;
+    padding:8px 13px; text-align:right;
+    font-family:'Space Mono',monospace; font-size:.72rem; white-space:nowrap;
   }
-  tbody td:first-child { text-align: left; color: var(--muted); }
-  .pos { color: var(--green); }
-  .neg { color: var(--red); }
-  .neu { color: var(--muted); }
+  tbody td:first-child { text-align:left; color:var(--muted); }
+  .pos { color:var(--green); }
+  .neg { color:var(--red); }
+  .neu { color:var(--muted); }
 
-  /* ── Footer ── */
   footer {
-    text-align: center;
-    padding: 32px;
-    font-size: 0.7rem;
-    color: var(--muted);
-    font-family: 'Space Mono', monospace;
+    text-align:center; padding:28px 16px;
+    font-size:.67rem; color:var(--muted); font-family:'Space Mono',monospace;
   }
-  footer a { color: var(--blue); text-decoration: none; }
+  footer a { color:var(--blue); text-decoration:none; }
 
-  @media (max-width: 600px) {
-    header, .controls, .cards, .charts { padding-left: 16px; padding-right: 16px; }
-    .table-panel { margin: 0 16px; }
-    .card-value { font-size: 1rem; }
+  @media(max-width:600px){
+    header,.controls,.cards,.charts { padding-left:14px; padding-right:14px; }
+    .table-panel { margin:0 14px; }
+    .card-val { font-size:1rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-left">
+  <div>
     <h1>台指期貨 <span>三大法人</span> 多空淨額</h1>
     <p>TAIFEX Institutional Net Open Interest · 單位：口數</p>
   </div>
-  <div class="updated-badge">資料更新：<strong id="updatedAt">—</strong></div>
+  <div class="badge">資料更新：<strong id="updatedAt">—</strong></div>
 </header>
 
 <div class="controls">
-  <label>顯示區間</label>
+  <span class="controls-label">顯示區間</span>
   <button class="btn-range" data-n="20">近20日</button>
   <button class="btn-range active" data-n="30">近30日</button>
   <button class="btn-range" data-n="60">近60日</button>
@@ -238,38 +177,58 @@
 <div class="cards" id="statsCards"></div>
 
 <div class="charts">
-  <!-- Chart 1: 三大法人淨額折線 -->
+
+  <!-- Chart 1: 三法人 + 台指期 疊合 (可點圖例切換) -->
   <div class="chart-panel">
-    <div class="chart-title">
-      <span class="dot" style="background:var(--blue)"></span>
-      三大法人多空未平倉淨額
+    <div class="chart-header">
+      <div class="chart-title">
+        <span class="dot" style="background:var(--blue)"></span>
+        三大法人淨口數 ＋ 台指期收盤對照
+      </div>
+      <div class="chart-sub">左軸：口數 ｜ 右軸：台指期點數（點圖例可顯示/隱藏）</div>
+      <div class="legend-pills" id="legend1"></div>
     </div>
-    <div class="chart-sub">外資 / 投信 / 自營商 各別淨口數走勢</div>
-    <div class="chart-wrap"><canvas id="chartInstitutional" height="90"></canvas></div>
+    <canvas id="c1" height="100"></canvas>
   </div>
 
-  <!-- Chart 2: 總和 + 期貨收盤 -->
+  <!-- Chart 2: 外資 + 台指期 -->
   <div class="chart-panel">
-    <div class="chart-title">
-      <span class="dot" style="background:var(--yellow)"></span>
-      總和淨額 vs 台指期收盤
+    <div class="chart-header">
+      <div class="chart-title">
+        <span class="dot" style="background:var(--red)"></span>
+        外資淨口數 vs 台指期收盤
+      </div>
+      <div class="chart-sub">外資為市場最大影響力，單獨與指數對照看趨勢關係</div>
     </div>
-    <div class="chart-sub">法人總淨口數（左軸）與台指期收盤價（右軸）對照</div>
-    <div class="chart-wrap"><canvas id="chartTotal" height="90"></canvas></div>
+    <canvas id="c2" height="85"></canvas>
   </div>
 
-  <!-- Chart 3: 外資每日增減 bar -->
+  <!-- Chart 3: 總和 + 台指期 -->
   <div class="chart-panel">
-    <div class="chart-title">
-      <span class="dot" style="background:var(--red)"></span>
-      外資每日增減（口數）
+    <div class="chart-header">
+      <div class="chart-title">
+        <span class="dot" style="background:var(--yellow)"></span>
+        法人總和淨口數 vs 台指期收盤
+      </div>
+      <div class="chart-sub">三大法人合計淨口數（左軸）vs 台指期收盤（右軸）</div>
     </div>
-    <div class="chart-sub">正值為加碼空單減少（偏多）；負值為加碼空單增加（偏空）</div>
-    <div class="chart-wrap"><canvas id="chartForeignChg" height="70"></canvas></div>
+    <canvas id="c3" height="85"></canvas>
   </div>
+
+  <!-- Chart 4: 外資增減 bar + 台指期 -->
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div class="chart-title">
+        <span class="dot" style="background:var(--orange)"></span>
+        外資每日增減（口） vs 台指期收盤
+      </div>
+      <div class="chart-sub">長條正值=減少空單（偏多方向）；負值=增加空單（偏空）；折線為指數走勢</div>
+    </div>
+    <canvas id="c4" height="75"></canvas>
+  </div>
+
 </div>
 
-<!-- Table -->
 <div class="table-panel">
   <h3>📋 近期明細</h3>
   <div class="table-scroll">
@@ -277,295 +236,228 @@
       <thead>
         <tr>
           <th>日期</th>
-          <th>外資 淨額</th>
-          <th>外資 增減</th>
-          <th>投信 淨額</th>
-          <th>投信 增減</th>
-          <th>自營商 淨額</th>
-          <th>自營商 增減</th>
-          <th>總和 淨額</th>
-          <th>總和 增減</th>
-          <th>台指期</th>
-          <th>漲跌</th>
+          <th>外資淨額</th><th>增減</th>
+          <th>投信淨額</th><th>增減</th>
+          <th>自營商淨額</th><th>增減</th>
+          <th>總和淨額</th><th>增減</th>
+          <th>台指期</th><th>漲跌</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="tBody"></tbody>
     </table>
   </div>
 </div>
 
 <footer>
   資料來源：<a href="https://www.wantgoo.com/futures/institutional-investors/net-open-interest" target="_blank">玩股網</a>
-  ｜ 本頁由 GitHub Actions 每日自動更新 ｜ 僅供參考，不構成投資建議
+  ｜ GitHub Actions 每個交易日 16:30 自動更新 ｜ 僅供參考，不構成投資建議
 </footer>
 
 <script>
-// ─── Helpers ───────────────────────────────────────────────
-const fmt = n => n == null ? '—' : n.toLocaleString();
-const sign = n => n > 0 ? '+' + n.toLocaleString() : n == null ? '—' : n.toLocaleString();
+// ── helpers ───────────────────────────────────────────
+const fmt  = n => n == null ? '—' : n.toLocaleString();
+const sign = n => n == null ? '—' : (n > 0 ? '+' : '') + n.toLocaleString();
 const cls  = n => n == null ? 'neu' : n > 0 ? 'pos' : n < 0 ? 'neg' : 'neu';
 
-// ─── State ─────────────────────────────────────────────────
-let allRecords = [];
-let activeN = 30;
-let charts = {};
+const GRID = 'rgba(255,255,255,0.05)';
+const TICK = '#4a5568';
+const FONT = { family:"'Space Mono',monospace", size: 10 };
+const TT   = { backgroundColor:'#1e293b', borderColor:'#334155', borderWidth:1, titleColor:'#e2e8f0', bodyColor:'#94a3b8' };
 
-// ─── Boot ──────────────────────────────────────────────────
+const COLOR = {
+  foreign:'#f4626a', itrust:'#22d3a0', dealer:'#60a5fa',
+  total:'#fbbf24', futures:'#f0abfc', orange:'#fb923c'
+};
+
+let allRecords = [], activeN = 30, CH = {};
+
+// ── boot ─────────────────────────────────────────────
 fetch('data.json?_=' + Date.now())
   .then(r => r.json())
-  .then(json => {
-    document.getElementById('updatedAt').textContent = json.updated || '—';
-    allRecords = (json.records || []).slice().reverse(); // oldest first
+  .then(j => {
+    document.getElementById('updatedAt').textContent = j.updated || '—';
+    allRecords = (j.records || []).slice().reverse(); // oldest→newest
     render(activeN);
   })
-  .catch(() => {
-    document.getElementById('updatedAt').textContent = '載入失敗，請確認 data.json 存在';
-  });
+  .catch(() => { document.getElementById('updatedAt').textContent = '載入失敗，請確認 data.json 存在'; });
 
-// ─── Range buttons ─────────────────────────────────────────
-document.querySelectorAll('.btn-range').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.btn-range').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeN = parseInt(btn.dataset.n);
-    render(activeN);
-  });
-});
+document.querySelectorAll('.btn-range').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.btn-range').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  activeN = parseInt(b.dataset.n);
+  render(activeN);
+}));
 
-// ─── Main render ───────────────────────────────────────────
 function render(n) {
-  const data = allRecords.slice(-n);
-  if (!data.length) return;
-  renderCards(data);
-  renderChartInstitutional(data);
-  renderChartTotal(data);
-  renderChartForeignChg(data);
-  renderTable(data);
+  const d = allRecords.slice(-n);
+  if (!d.length) return;
+  renderCards(d);
+  chart1(d); chart2(d); chart3(d); chart4(d);
+  renderTable(d);
 }
 
-// ─── Stat cards ────────────────────────────────────────────
+// ── cards ─────────────────────────────────────────────
 function renderCards(data) {
-  const last = data[data.length - 1];
-  const cards = [
-    { label: '外資 淨額', val: last.foreign,  chg: last.foreign_chg,  cls: 'red'    },
-    { label: '投信 淨額', val: last.itrust,   chg: last.itrust_chg,   cls: 'green'  },
-    { label: '自營商 淨額',val: last.dealer,  chg: last.dealer_chg,   cls: 'blue'   },
-    { label: '總和 淨額', val: last.total,    chg: last.total_chg,    cls: 'yellow' },
-    { label: '台指期收盤', val: last.futures, chg: last.futures_chg,  cls: 'purple' },
+  const l = data[data.length - 1];
+  const items = [
+    { lbl:'外資 淨額',   v:l.foreign,  c:l.foreign_chg,  cc:'c-red'     },
+    { lbl:'投信 淨額',   v:l.itrust,   c:l.itrust_chg,   cc:'c-green'   },
+    { lbl:'自營商 淨額', v:l.dealer,   c:l.dealer_chg,   cc:'c-blue'    },
+    { lbl:'總和 淨額',   v:l.total,    c:l.total_chg,    cc:'c-yellow'  },
+    { lbl:'台指期收盤',  v:l.futures,  c:l.futures_chg,  cc:'c-futures' },
   ];
-  document.getElementById('statsCards').innerHTML = cards.map(c => `
-    <div class="card ${c.cls}">
-      <div class="card-label">${c.label}</div>
-      <div class="card-value ${cls(c.val)}">${fmt(c.val)}</div>
-      <div class="card-chg ${c.chg > 0 ? 'up' : c.chg < 0 ? 'dn' : ''}">${sign(c.chg)}</div>
-    </div>
-  `).join('');
+  document.getElementById('statsCards').innerHTML = items.map(i => `
+    <div class="card ${i.cc}">
+      <div class="card-label">${i.lbl}</div>
+      <div class="card-val ${cls(i.v)}">${fmt(i.v)}</div>
+      <div class="card-chg ${i.c>0?'up':i.c<0?'dn':''}">${sign(i.c)}</div>
+    </div>`).join('');
 }
 
-// ─── Chart helpers ─────────────────────────────────────────
-const GRID_COLOR  = 'rgba(255,255,255,0.05)';
-const TICK_COLOR  = '#4a5568';
-const defaultFont = { family: "'Space Mono', monospace", size: 10 };
-
-function sharedScaleX(labels) {
+// ── chart helpers ─────────────────────────────────────
+function xScale() {
+  return { ticks:{color:TICK,font:FONT,maxRotation:45,autoSkip:true,maxTicksLimit:14}, grid:{color:GRID} };
+}
+function yScale(col, side) {
   return {
-    ticks: { color: TICK_COLOR, font: defaultFont, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 },
-    grid: { color: GRID_COLOR },
+    position: side,
+    ticks: { color:col||TICK, font:FONT, callback: v => v.toLocaleString() },
+    grid:  side==='left' ? {color:GRID} : {display:false}
   };
 }
-
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+function destroy(id) { if(CH[id]){ CH[id].destroy(); delete CH[id]; } }
+function ttCb(isRight) {
+  return { callbacks:{ label: ctx => {
+    const u = (ctx.dataset.yAxisID === 'yR') ? ' 點' : ' 口';
+    const v = ctx.parsed.y;
+    return ` ${ctx.dataset.label}: ${(v>=0?'+':'')}${v?.toLocaleString()??'—'}${u}`;
+  }}}
 }
 
-// ─── Chart 1: 三法人各別 ───────────────────────────────────
-function renderChartInstitutional(data) {
-  destroyChart('inst');
-  const labels = data.map(d => d.date.slice(5)); // MM/DD
-  const ctx = document.getElementById('chartInstitutional').getContext('2d');
-  charts['inst'] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: '外資',
-          data: data.map(d => d.foreign),
-          borderColor: '#f4626a',
-          backgroundColor: 'rgba(244,98,106,0.08)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          tension: 0.3,
-          fill: false,
-        },
-        {
-          label: '投信',
-          data: data.map(d => d.itrust),
-          borderColor: '#22d3a0',
-          backgroundColor: 'rgba(34,211,160,0.08)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          tension: 0.3,
-          fill: false,
-        },
-        {
-          label: '自營商',
-          data: data.map(d => d.dealer),
-          borderColor: '#60a5fa',
-          backgroundColor: 'rgba(96,165,250,0.08)',
-          borderWidth: 2,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          tension: 0.3,
-          fill: false,
-        },
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { color: '#94a3b8', font: defaultFont, boxWidth: 12 } },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          borderColor: '#334155',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} 口` }
-        }
-      },
-      scales: {
-        x: sharedScaleX(labels),
-        y: {
-          ticks: { color: TICK_COLOR, font: defaultFont, callback: v => v.toLocaleString() },
-          grid: { color: GRID_COLOR },
-        }
-      }
-    }
-  });
-}
-
-// ─── Chart 2: 總和 + 期貨 dual axis ───────────────────────
-function renderChartTotal(data) {
-  destroyChart('total');
+// ── Chart 1: 三法人 + 台指期（四條線，可切換）────────────
+function chart1(data) {
+  destroy('c1');
   const labels = data.map(d => d.date.slice(5));
-  const ctx = document.getElementById('chartTotal').getContext('2d');
-  charts['total'] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: '總和淨額',
-          data: data.map(d => d.total),
-          borderColor: '#fbbf24',
-          backgroundColor: 'rgba(251,191,36,0.08)',
-          borderWidth: 2.5,
-          pointRadius: 3,
-          tension: 0.3,
-          yAxisID: 'yLeft',
-          fill: true,
-        },
-        {
-          label: '台指期收盤',
-          data: data.map(d => d.futures),
-          borderColor: '#a78bfa',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointRadius: 2,
-          tension: 0.3,
-          yAxisID: 'yRight',
-          fill: false,
-          borderDash: [4,3],
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { color: '#94a3b8', font: defaultFont, boxWidth: 12 } },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          borderColor: '#334155',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          callbacks: {
-            label: ctx => {
-              const u = ctx.dataset.yAxisID === 'yRight' ? ' 點' : ' 口';
-              return ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}${u}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: sharedScaleX(labels),
-        yLeft: {
-          position: 'left',
-          ticks: { color: '#fbbf24', font: defaultFont, callback: v => v.toLocaleString() },
-          grid: { color: GRID_COLOR },
-        },
-        yRight: {
-          position: 'right',
-          ticks: { color: '#a78bfa', font: defaultFont, callback: v => v.toLocaleString() },
-          grid: { display: false },
-        }
-      }
+
+  const datasets = [
+    { label:'外資',   data:data.map(d=>d.foreign), borderColor:COLOR.foreign, borderWidth:2,   pointRadius:3, pointHoverRadius:5, tension:.3, yAxisID:'yL', fill:false },
+    { label:'投信',   data:data.map(d=>d.itrust),  borderColor:COLOR.itrust,  borderWidth:2,   pointRadius:3, pointHoverRadius:5, tension:.3, yAxisID:'yL', fill:false },
+    { label:'自營商', data:data.map(d=>d.dealer),  borderColor:COLOR.dealer,  borderWidth:2,   pointRadius:3, pointHoverRadius:5, tension:.3, yAxisID:'yL', fill:false },
+    { label:'台指期', data:data.map(d=>d.futures), borderColor:COLOR.futures, borderWidth:2.5, pointRadius:2, pointHoverRadius:5, tension:.3, yAxisID:'yR', fill:false, borderDash:[5,4] },
+  ];
+
+  // render legend pills
+  const lg = document.getElementById('legend1');
+  lg.innerHTML = datasets.map((ds, i) => {
+    const isDash = !!ds.borderDash;
+    return `<div class="lpill" data-i="${i}" onclick="toggleDS(${i},this)">
+      <span class="lswatch${isDash?' dash':''}" style="${isDash?'border-color:'+ds.borderColor:'background:'+ds.borderColor}"></span>
+      ${ds.label}
+    </div>`;
+  }).join('');
+
+  const ctx = document.getElementById('c1').getContext('2d');
+  CH['c1'] = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets },
+    options:{
+      responsive:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{display:false}, tooltip:{ ...TT, ...ttCb() } },
+      scales:{ x:xScale(), yL:yScale(TICK,'left'), yR:yScale(COLOR.futures,'right') }
     }
   });
 }
 
-// ─── Chart 3: 外資增減 bar ─────────────────────────────────
-function renderChartForeignChg(data) {
-  destroyChart('fchg');
+window.toggleDS = function(i, el) {
+  const chart = CH['c1'];
+  if (!chart) return;
+  const meta = chart.getDatasetMeta(i);
+  meta.hidden = !meta.hidden;
+  el.classList.toggle('off', meta.hidden);
+  chart.update();
+};
+
+// ── Chart 2: 外資 + 台指期 ───────────────────────────────
+function chart2(data) {
+  destroy('c2');
   const labels = data.map(d => d.date.slice(5));
-  const values = data.map(d => d.foreign_chg);
-  const colors = values.map(v => v == null ? '#4a5568' : v >= 0 ? 'rgba(34,211,160,0.7)' : 'rgba(244,98,106,0.7)');
-  const ctx = document.getElementById('chartForeignChg').getContext('2d');
-  charts['fchg'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: '外資增減',
-        data: values,
-        backgroundColor: colors,
-        borderRadius: 3,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          borderColor: '#334155',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          callbacks: { label: ctx => ` 增減: ${sign(ctx.parsed.y)} 口` }
-        }
+  const ctx = document.getElementById('c2').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0,'rgba(244,98,106,0.2)');
+  grad.addColorStop(1,'rgba(244,98,106,0.01)');
+  CH['c2'] = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'外資淨口數', data:data.map(d=>d.foreign), borderColor:COLOR.foreign, backgroundColor:grad, borderWidth:2.5, pointRadius:3, tension:.3, yAxisID:'yL', fill:true },
+      { label:'台指期收盤', data:data.map(d=>d.futures), borderColor:COLOR.futures, backgroundColor:'transparent', borderWidth:2, pointRadius:2, tension:.3, yAxisID:'yR', fill:false, borderDash:[5,4] },
+    ]},
+    options:{
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{labels:{color:'#94a3b8',font:FONT,boxWidth:12}}, tooltip:{...TT,...ttCb()} },
+      scales:{ x:xScale(), yL:yScale(COLOR.foreign,'left'), yR:yScale(COLOR.futures,'right') }
+    }
+  });
+}
+
+// ── Chart 3: 總和 + 台指期 ───────────────────────────────
+function chart3(data) {
+  destroy('c3');
+  const labels = data.map(d => d.date.slice(5));
+  const ctx = document.getElementById('c3').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0,'rgba(251,191,36,0.22)');
+  grad.addColorStop(1,'rgba(251,191,36,0.01)');
+  CH['c3'] = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'總和淨口數', data:data.map(d=>d.total), borderColor:COLOR.total, backgroundColor:grad, borderWidth:2.5, pointRadius:3, tension:.3, yAxisID:'yL', fill:true },
+      { label:'台指期收盤', data:data.map(d=>d.futures), borderColor:COLOR.futures, backgroundColor:'transparent', borderWidth:2, pointRadius:2, tension:.3, yAxisID:'yR', fill:false, borderDash:[5,4] },
+    ]},
+    options:{
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{labels:{color:'#94a3b8',font:FONT,boxWidth:12}}, tooltip:{...TT,...ttCb()} },
+      scales:{ x:xScale(), yL:yScale(COLOR.total,'left'), yR:yScale(COLOR.futures,'right') }
+    }
+  });
+}
+
+// ── Chart 4: 外資增減 bar + 台指期折線 ───────────────────
+function chart4(data) {
+  destroy('c4');
+  const labels = data.map(d => d.date.slice(5));
+  const chg = data.map(d => d.foreign_chg);
+  const barCol = chg.map(v => v==null ? '#4a5568' : v>=0 ? 'rgba(34,211,160,.75)' : 'rgba(244,98,106,.75)');
+  const ctx = document.getElementById('c4').getContext('2d');
+  CH['c4'] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[
+      { type:'bar',  label:'外資增減',   data:chg,                   backgroundColor:barCol, borderRadius:3, yAxisID:'yL', order:2 },
+      { type:'line', label:'台指期收盤', data:data.map(d=>d.futures), borderColor:COLOR.futures, backgroundColor:'transparent', borderWidth:2, pointRadius:2, tension:.3, yAxisID:'yR', fill:false, borderDash:[5,4], order:1 },
+    ]},
+    options:{
+      responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#94a3b8',font:FONT,boxWidth:12}},
+        tooltip:{...TT, callbacks:{ label: ctx => {
+          const u = ctx.dataset.yAxisID==='yR' ? ' 點' : ' 口';
+          const v = ctx.parsed.y;
+          return ` ${ctx.dataset.label}: ${v>=0?'+':''}${v?.toLocaleString()??'—'}${u}`;
+        }}}
       },
-      scales: {
-        x: sharedScaleX(labels),
-        y: {
-          ticks: { color: TICK_COLOR, font: defaultFont, callback: v => v.toLocaleString() },
-          grid: { color: GRID_COLOR },
-          border: { display: false },
-        }
+      scales:{
+        x: xScale(),
+        yL: yScale(TICK,'left'),
+        yR: yScale(COLOR.futures,'right'),
       }
     }
   });
 }
 
-// ─── Table ─────────────────────────────────────────────────
+// ── Table ─────────────────────────────────────────────
 function renderTable(data) {
-  const rows = [...data].reverse().slice(0, 30);
-  document.getElementById('tableBody').innerHTML = rows.map(r => `
+  const rows = [...data].reverse().slice(0,30);
+  document.getElementById('tBody').innerHTML = rows.map(r => `
     <tr>
       <td>${r.date}</td>
       <td class="${cls(r.foreign)}">${fmt(r.foreign)}</td>
@@ -576,10 +468,9 @@ function renderTable(data) {
       <td class="${cls(r.dealer_chg)}">${sign(r.dealer_chg)}</td>
       <td class="${cls(r.total)}">${fmt(r.total)}</td>
       <td class="${cls(r.total_chg)}">${sign(r.total_chg)}</td>
-      <td>${fmt(r.futures)}</td>
+      <td style="color:var(--futures)">${fmt(r.futures)}</td>
       <td class="${cls(r.futures_chg)}">${sign(r.futures_chg)}</td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
 </script>
 </body>
