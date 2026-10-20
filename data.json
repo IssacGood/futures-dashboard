@@ -1,7 +1,20 @@
 {
-  "updated": "2026-10-19 16:14:08",
+  "updated": "2026-10-20 14:07:48",
   "source": "https://www.taifex.com.tw/cht/3/futContractsDate",
   "records": [
+    {
+      "date": "2026/10/20",
+      "foreign": -89748,
+      "foreign_chg": 1397,
+      "itrust": 84389,
+      "itrust_chg": 289,
+      "dealer": 2700,
+      "dealer_chg": -129,
+      "total": -2659,
+      "total_chg": 1557,
+      "futures": null,
+      "futures_chg": null
+    },
     {
       "date": "2026/10/19",
       "foreign": -91145,
